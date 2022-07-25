@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        ol {
+            cursor: pointer;
+        }
+        ol.inactive {
+            text-decoration: line-through;
+        }
+    </style>
+</head>
+<body>
+
+<form>
+    <input type="text" id="name" placeholder="task name">
+    <input type="submit">
+</form>
+<list></list>
+
+<script>
+    const $ = el => document.querySelector(el);
+    const refreshList = () => {
+        $("list").innerHTML = "";
+        fetch("http://localhost:8080/v1/tasks/")
+            .then(res => res.json())
+            .then(tasks => {
+                tasks.forEach(task => {
+                    const ol = document.createElement('ol');
+
+                    if (task.is_active) {
+                        ol.classList.remove('inactive');
+                    } else {
+                        ol.classList.add('inactive');
+                    }
+                    ol.innerHTML = task.name;
+                    ol.onclick = () => {
+                        fetch(`http://localhost:8080/v1/tasks/${task.id}`, {
+                            method: "PATCH",
+                            body: JSON.stringify({
+                                is_active: !task.is_active,
+                            })
+                        }).then(() => refreshList());
+                    };
+                    $('list').appendChild(ol);
+                });
+            });
+    }
+
+    $("form").addEventListener("submit", e => {
+        e.preventDefault()
+
+        fetch("http://localhost:8080/v1/tasks/", {
+            method: "POST",
+            body: JSON.stringify({
+                name: $("#name").value
+            })
+        })
+            .then(data => data.json())
+            .then(data => {
+                refreshList()
+            }).catch(err => {
+                console.error(err);
+            });
+    })
+
+    refreshList()
+</script>
+</body>
+</html>

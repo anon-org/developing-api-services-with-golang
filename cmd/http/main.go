@@ -46,6 +46,7 @@ func main() {
 	migrate(context.Background(), db)
 	api := task.Wire(db)
 
+	http.Handle("/", http.FileServer(http.Dir("./public")))
 	http.HandleFunc(task.V1HTTPEndpoint, api.Route())
 
 	logger.Println("listening on", appPort)
