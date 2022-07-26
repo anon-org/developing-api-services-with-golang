@@ -3,12 +3,13 @@ package main
 import (
 	"context"
 	"database/sql"
-	"github.com/anon-org/developing-api-services-with-golang/task"
-	"github.com/anon-org/developing-api-services-with-golang/util/logutil"
-	_ "github.com/mattn/go-sqlite3"
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/anon-org/developing-api-services-with-golang/task"
+	"github.com/anon-org/developing-api-services-with-golang/util/logutil"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 const (
@@ -46,7 +47,6 @@ func main() {
 	migrate(context.Background(), db)
 	api := task.Wire(db)
 
-	http.Handle("/", http.FileServer(http.Dir("./public")))
 	http.HandleFunc(task.V1HTTPEndpoint, api.Route())
 
 	logger.Println("listening on", appPort)
